@@ -1,65 +1,33 @@
-## 📚 CURLS (Linux) :
+## 📚 Descripción general del proyecto.
 
-- GET (Obtener todas las categorías)
+La veterinaria “Patitas Felices” necesita un sistema de gestión que permita administrar su información de manera segura y organizada.
+El sistema contempla las siguientes entidades: 
+- Dueños
+- Mascotas
+- Veterinarios
+- Historial clínico
+Flujo del sistema:
+ - Usuario entra a /index.html (Portal Clientes) -> Register/Login (Auth) -> Carga de mascota(s) y vinculacion (User-Pet relacion) -> Ve su(s) mascota(s) -> Ve sus historiales.
+ - Veterinario entra a /staffPage/staff.html -> Ve TODOS los pacientes -> Crea historiales (Pet-HistorialClinico relacion) -> Edita mascotas.
 
-  curl -X GET http://localhost:5000/api/categoria
+# Tecnologías utilizadas.
 
--  GET (Obtener una categoría por ID)
-  
-     curl -X GET http://localhost:5000/api/categoria/6983f8a27e60b1278e28e6ae
+# Instrucciones de instalación.
 
-- POST (Crear una nueva categoría)
-  
-  curl -X POST http://localhost:5000/api/categoria \
-     -H "Content-Type: application/json" \
-     -d '{"name": "Tecnología y Audio"}'
+# Pasos para ejecutar el proyecto.
 
-- PUT (Actualizar una categoría existente)
-  
-    curl -X PUT http://localhost:5000/api/categoria/6983f8a27e60b1278e28e6ae \
-     -H "Content-Type: application/json" \
-     -d '{"name": "Computación y Gaming"}'
-     
-- DELETE (Eliminar categoria existente)
+# Variables de entorno requeridas.
 
-  curl -X DELETE http://localhost:5000/api/categoria/6983f8a27e60b1278e28e6ae
-  
-## 📚 CURLS (Powershell) :
+# Ejemplos de endpoints principales.
+GET /api/mascotas/mis-mascotas: Usuario ve a su(s) mascota(s).
+GET /api/historial/mascota/:petId: Usuario ve las consultas médicas de una de sus mascotas.
+POST /api/historial: El veterinario carga una consulta nueva
 
-- GET (Obtener todas las categorías)
-  
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria" -Method Get
+# Aclaración de la opción de frontend utilizada:
+  Opción 1 – HTML, CSS y JavaScript:
+- Frontend básico
+- Ubicado dentro de la carpeta /public del backend
+- Consumo de la API mediante fetch o similar
+    
 
-- GET (Obtener una categoría por ID)
-  
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/{id}" -Method Get
 
-Ej con categoria con id 10: Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/10" -Method Get
-
-- POST (Crear una nueva categoría)
-  
-Ej con categoria "Limpieza":
-$body = @{ name = "Limpieza" } | ConvertTo-Json
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria" -Method Post -Body $body -ContentType "application/json"
-
->> Ej para evitar errores por UTF-8:
->>
->>$body = @{ name = "Tecnología y Audio" } | ConvertTo-Json -Compress
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria" `
-                  -Method Post `
-                  -Body ([System.Text.Encoding]::UTF8.GetBytes($body)) `
-                  -ContentType "application/json; charset=utf-8"
-
-- PUT (Actualizar una categoría existente)
-  
-Ej con categoria "Limpieza":
-
-$body = @{ name = "Limpieza" } | ConvertTo-Json
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/{id}" -Method Put -Body $body -ContentType "application/json"
-
-- DELETE (Eliminar categoria existente)
-  
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/{id}" -Method Delete
-
-Ej con categoria 10:
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/10" -Method Delete
