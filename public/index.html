@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Patitas Felices - Mi Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>🐾 Patitas Felices - Portal Clientes</h1>
+
+    <!-- CONTENEDOR DE AUTENTICACIÓN (LOGIN Y REGISTRO) -->
+    <div id="authContainer" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        
+        <!-- LOGIN -->
+        <div id="loginSection" class="card">
+            <h2>Ingresar al Portal</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Entrar</button>
+            <p style="text-align: center; margin-top: 15px;">
+                <a href="/staffPage/staff.html" style="font-size: 0.8em; color: #666;">¿Sos personal de la clínica? Ingresá acá</a>
+            </p>
+        </div>
+
+        <!-- REGISTRO -->
+        <div id="registerSection" class="card" style="border-top: 5px solid #28a745;">
+            <h2>¿Sos nuevo? Registrate</h2>
+            <input type="text" id="regUser" placeholder="Nombre de Usuario">
+            <input type="email" id="regEmail" placeholder="Email">
+            <input type="password" id="regPass" placeholder="Password (Mayúscula + Especial)">
+            <input type="text" id="regPhone" placeholder="Teléfono (11...)">
+            <button onclick="register()" style="background: #28a745;">Crear Cuenta</button>
+        </div>
+    </div>
+
+    <!-- PANEL PRINCIPAL (DUEÑO LOGUEADO) -->
+    <div id="mainSection" class="card" style="display:none;">
+        <h2 id="welcomeMsg">Bienvenido/a a tu Panel</h2>
+        
+        <!-- FORMULARIO PARA QUE EL DUEÑO AGREGUE SU MASCOTA -->
+        <div class="card" style="background: #eef7ee; border: 1px solid #c3e6cb;">
+            <h3>➕ Registrar mi Mascota</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="petName" placeholder="Nombre" style="width: 120px;">
+                <input type="text" id="petSpecies" placeholder="Especie" style="width: 100px;">
+                <input type="text" id="petBreed" placeholder="Raza" style="width: 100px;">
+                <input type="number" id="petAge" placeholder="Edad" style="width: 60px;">
+                <button onclick="addMyPet()" style="width: auto; background: #28a745;">Registrar</button>
+            </div>
+        </div>
+
+        <!-- Dentro de mainSection -->
+<h3>Mis Mascotas</h3>
+<table id="petsTable">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Especie</th>
+            <th>Raza</th>
+            <th>Edad</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+            <tbody></tbody>
+        </table>
+
+        <div id="petHistoryView" class="card" style="display:none; background: #f9f9f9; border: 1px dashed #ccc; margin-top: 20px;">
+            <h3 id="historyTitle">Historial de...</h3>
+            <div id="historyContent"></div>
+            <button onclick="document.getElementById('petHistoryView').style.display='none'" style="background:gray; width: auto; padding: 5px 10px;">Cerrar Historial</button>
+        </div>
+
+        <button class="btn-logout" onclick="logout()" style="background: #dc3545; margin-top: 20px;">Cerrar Sesión</button>
+    </div>
+
+    <script>
+        let token = "";
+
+        // --- FUNCION REGISTRO ---
+        async function register() {
+            const body = {
+                username: document.getElementById('regUser').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPass').value,
+                phone: document.getElementById('regPhone').value,
+                role: "user"
+            };
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert("¡Cuenta creada con éxito! Ya podés loguearte.");
+            } else {
+                alert("Error en el registro: " + (data.errors ? data.errors[0].msg : data.error));
+            }
+        }
+
+        // --- FUNCION LOGIN ---
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (data.token) {
+                token = data.token;
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('mainSection').style.display = 'block';
+                loadPets();
+            } else {
+                alert("Error: " + (data.error || "Credenciales incorrectas"));
+            }
+        }
+
+        // --- CARGAR MIS MASCOTAS ---
+        async function loadPets() {
+            const res = await fetch('/api/mascotas/mis-mascotas', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const pets = await res.json();
+            const tbody = document.querySelector('#petsTable tbody');
+            tbody.innerHTML = pets.map(pet => `
+                <tr>
+                    <td>${pet.name}</td>
+                    <td>${pet.species}</td>
+                    <td>${pet.breed}</td>
+                    <td>${pet.age}</td>
+                    <td><button onclick="viewPetHistory('${pet.id}', '${pet.name}')" style="background:#28a745; font-size: 0.8em; width:auto;">Ver Clínica</button></td>
+                </tr>
+            `).join('');
+        }
+
+        // --- DUEÑO AGREGA MASCOTA ---
+        async function addMyPet() {
+            const body = {
+                name: document.getElementById('petName').value,
+                species: document.getElementById('petSpecies').value,
+                breed: document.getElementById('petBreed').value,
+                age: parseInt(document.getElementById('petAge').value)
+            };
+            const res = await fetch('/api/mascotas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                alert("¡Mascota registrada!");
+                loadPets();
+            } else { alert("Error al registrar mascota"); }
+        }
+
+        // --- VER HISTORIAL ---
+        async function viewPetHistory(petId, name) {
+            const res = await fetch(`/api/historial/mascota/${petId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const history = await res.json();
+            const view = document.getElementById('petHistoryView');
+            const content = document.getElementById('historyContent');
+            document.getElementById('historyTitle').innerText = "Historial de " + name;
+            view.style.display = 'block';
+            content.innerHTML = history.length > 0 
+                ? history.map(h => `<div style="border-bottom: 1px solid #ddd; padding: 10px 0;"><small>${new Date(h.date).toLocaleDateString()}</small><br><strong>Diag:</strong> ${h.diagnosis}<br><strong>Trat:</strong> ${h.treatment}</div>`).join('')
+                : "<p>Sin registros médicos aún.</p>";
+            view.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function logout() { location.reload(); }
+    </script>
+</body>
+</html>

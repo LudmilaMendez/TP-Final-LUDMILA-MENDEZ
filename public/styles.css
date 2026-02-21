@@ -1,0 +1,131 @@
+/* public/styles.css */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    padding: 20px; 
+    background: #f0f2f5; 
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra todo horizontalmente */
+    min-height: 100vh;
+    margin: 0;
+}
+
+h1 { 
+    color: #2c3e50; 
+    text-align: center; 
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+/* Contenedor que agrupa Login y Registro */
+#authContainer {
+    display: flex; 
+    gap: 20px; 
+    justify-content: center; 
+    align-items: flex-start;
+    flex-wrap: wrap; 
+    max-width: 900px;
+    width: 100%;
+}
+
+.card { 
+    background: white; 
+    padding: 25px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    margin-bottom: 20px; 
+    width: 100%;
+    max-width: 400px; /* Tamaño ideal para las tarjetas de login/registro */
+    box-sizing: border-box;
+}
+
+/* El panel principal se ensancha para que la tabla respire */
+#mainSection {
+    max-width: 900px; /* Un poco más ancho */
+    width: 100%;
+}
+
+/* Forzamos a que las tarjetas ADENTRO del panel principal NO se centren como columna */
+#mainSection .card {
+    max-width: 100%;
+    width: 100%;
+    display: block; /* Volvemos al comportamiento normal */
+}
+
+/* Contenedor de los inputs de "Registrar mi Mascota" */
+#mainSection .card div {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Si no entran, bajan, pero mientras tanto van de costado */
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Los inputs de la mascota NO deben ocupar el 100% */
+#mainSection .card input {
+    flex: 1;
+    min-width: 120px;
+    margin-bottom: 0; /* Quitamos el margen de abajo para que queden en línea */
+}
+
+/* El botón de Registrar (el verde) */
+#mainSection .card button {
+    width: auto;
+    min-width: 150px;
+}
+
+
+input { 
+    display: block; 
+    margin-bottom: 12px; 
+    padding: 10px; 
+    width: 100%; 
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+button { 
+    padding: 12px; 
+    cursor: pointer; 
+    background: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 6px; 
+    width: 100%;
+    font-weight: bold;
+    transition: opacity 0.2s;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 15px; 
+}
+
+th, td { 
+    border-bottom: 1px solid #eee; 
+    padding: 12px; 
+    text-align: left; 
+    min-width: 100px; /* Le damos aire a las columnas */
+    padding: 12px;
+}
+
+th { 
+    background: #f8f9fa;
+    color: #666;
+}
+
+.btn-logout {
+    background: #dc3545;
+    margin-top: 20px;
+}
+
+
+.section { margin-top: 10px; }
+button { margin: 5px; width: auto; min-width: 100px; } /* Ajuste para botones en fila */
+h1 { margin-bottom: 30px; }

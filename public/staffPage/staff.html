@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Patitas Felices - Staff</title>
+    <link rel="stylesheet" href="staff.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Panel del Staff</h1>
+
+        <!-- LOGIN STAFF -->
+        <div id="loginSection" class="card">
+            <h2>Ingreso Profesionales</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Ingresar al Sistema</button>
+        </div>
+
+            <!-- PANEL DE CONTROL -->
+        <div id="mainSection" style="display:none;">
+            <div class="card user-info">
+                <p>Bienvenido/a: <strong id="userName"></strong> (<span id="userRole"></span>)</p>
+                <button class="btn-logout" onclick="logout()">Salir</button>
+            </div>
+
+            <!-- AQUÍ VA EL NUEVO BLOQUE DE REGISTRO -->
+            <div class="card" style="background: #e9ecef; border-left: 5px solid #007bff;">
+                <h3>🆕 Registrar Nueva Mascota</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="newName" placeholder="Nombre" style="flex: 1; min-width: 150px;">
+                    <input type="text" id="newSpecies" placeholder="Especie" style="flex: 1; min-width: 120px;">
+                    <input type="number" id="newAge" placeholder="Edad" style="width: 80px;">
+                    <input type="text" id="newOwnerId" placeholder="ID del Dueño (6999...)" style="flex: 2; min-width: 200px;">
+                    <button onclick="createNewPet()" style="width: auto; background: #007bff;">Registrar</button>
+                </div>
+            </div>
+            <!-- TABLA DE MASCOTAS -->
+            <div class="card">
+                <h2>🐾 Pacientes en el Sistema</h2>
+                <table id="petsTable">
+                    <thead>
+                        <tr>
+                <th>Nombre</th>
+                <th>Especie</th>
+                <th>Edad</th> 
+                <th>Dueño (ID)</th>
+                <th>Acción</th>
+            </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- FORMULARIO HISTORIAL (UNA SOLA VEZ) -->
+            <div id="historyForm" class="card" style="display:none; border-top: 5px solid #28a745;">
+                <h2 id="formTitle">Atendiendo a: ...</h2>
+                
+                <!-- BLOQUE DE ANTECEDENTES -->
+                <div id="previousHistory" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffeeba; color: #856404;">
+                    <h3>Cargando antecedentes...</h3>
+                </div>
+
+                <input type="hidden" id="selectedPetId">
+                <textarea id="description" placeholder="Descripción de la consulta"></textarea>
+                <input type="text" id="diagnosis" placeholder="Diagnóstico"></input>
+                <textarea id="treatment" placeholder="Tratamiento indicado"></textarea>
+                <button onclick="saveRecord()" class="btn-save">Guardar Historia Clínica</button>
+            </div>
+        </div>
+    </div>
+    <script src="staff.js"></script>
+</body>
+</html>

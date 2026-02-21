@@ -9,11 +9,12 @@ export const register = async (req: Request, res: Response) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { username, email, password } = req.body;
-        await authService.register(username, email, password);
+        const { username, email, password, phone, role} = req.body;
+        await authService.register(username, email, password, phone, role);
 
         return res.status(201).json({ message: 'Usuario creado exitosamente' });
     } catch (error: any) {
+        console.error("DETALLE DEL ERROR EN REGISTER:", error); 
         // MongoDB devuelve error code 11000 para duplicados
         if (error.code === 11000) {
             return res.status(409).json({ error: 'El usuario o email ya existe' });

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { JwtPayload } from '../types/auth';
+import { JwtPayload, UserRole } from '../types/auth';
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -34,7 +34,7 @@ export const authenticate = (
  *
  * Verifica que el usuario tenga uno de los roles permitidos
  */
-export const authorize = (roles: Array<'user' | 'admin'>) => {
+export const authorize = (roles: Array<UserRole | string>) => { 
     return (req: Request, res: Response, next: NextFunction) => {
         if (!req.user || !roles.includes(req.user.role)) {
             return res.status(403).json({ message: 'Acceso denegado' });
