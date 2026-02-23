@@ -29,5 +29,28 @@ POST /api/historial: El veterinario carga una consulta nueva
 - Ubicado dentro de la carpeta /public del backend
 - Consumo de la API mediante fetch o similar
     
+# 🐾 Veterinaria Patitas Felices - API Backend
+
+## 📝 Descripción General
+Este proyecto es un sistema de gestión integral para la **Veterinaria "Patitas Felices"**. La solución permite administrar de manera segura y organizada la información de **Dueños, Mascotas, Veterinarios e Historiales Clínicos**. 
+
+El sistema utiliza una arquitectura **MVC (Modelo-Vista-Controlador)** y aplica reglas de negocio estrictas: los dueños solo pueden ver sus propias mascotas, mientras que los veterinarios y administradores tienen acceso a la gestión clínica profesional(diferencia entre vet y admin: vet puede editar pero no eliminar).
+
+## 🚀 Tecnologías Utilizadas
+- **Lenguaje:** TypeScript
+- **Entorno de ejecución:** Node.js & Express
+- **Base de Datos:** MongoDB con Mongoose
+- **Seguridad:** 
+  - **JWT (JSON Web Tokens):** Para manejo de sesiones y rutas privadas.
+  - **BcryptJS:** Para el hasheo y resguardo de contraseñas.
+  - **Middlewares:** Filtros de Autenticación y Autorización por roles (`admin`, `vet`, `user`).
+- **Validación:** `express-validator` para asegurar la integridad de los datos de entrada.
+
+## 🛠️ Instrucciones de Instalación
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone <URL_DE_TU_REPOSITORIO>
+   cd patitas-felices
 
 
