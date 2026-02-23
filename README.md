@@ -1,65 +1,87 @@
-## 📚 CURLS (Linux) :
+# 🐾 Veterinaria Patitas Felices - API Backend
 
-- GET (Obtener todas las categorías)
+## 📝 Descripción General
+Este proyecto es un sistema de gestión integral para la **Veterinaria "Patitas Felices"**. La solución permite administrar de manera segura y organizada la información de **Dueños, Mascotas, Veterinarios e Historiales Clínicos**. 
 
-  curl -X GET http://localhost:5000/api/categoria
+El sistema utiliza una arquitectura **MVC (Modelo-Vista-Controlador)** y aplica reglas de negocio estrictas: los dueños solo pueden ver sus propias mascotas, mientras que los veterinarios y administradores tienen acceso a la gestión clínica profesional(diferencia entre vet y admin: vet puede editar pero no eliminar).
 
--  GET (Obtener una categoría por ID)
-  
-     curl -X GET http://localhost:5000/api/categoria/6983f8a27e60b1278e28e6ae
+## 🚀 Tecnologías Utilizadas
+- **Lenguaje:** TypeScript
+- **Entorno de ejecución:** Node.js & Express
+- **Base de Datos:** MongoDB con Mongoose
+- **Seguridad:** 
+  - **JWT (JSON Web Tokens):** Para manejo de sesiones y rutas privadas.
+  - **BcryptJS:** Para el hasheo y resguardo de contraseñas.
+  - **Middlewares:** Filtros de Autenticación y Autorización por roles (`admin`, `vet`, `user`).
+- **Validación:** `express-validator` para asegurar la integridad de los datos de entrada.
 
-- POST (Crear una nueva categoría)
-  
-  curl -X POST http://localhost:5000/api/categoria \
-     -H "Content-Type: application/json" \
-     -d '{"name": "Tecnología y Audio"}'
+## ⚙️ Variables de Entorno Requeridas
+El archivo .env debe contener:
+PORT: Puerto de escucha del servidor (ej: 5000).
+MONGODB_URI: Cadena de conexión a MongoDB Atlas o local.
+JWT_SECRET: Clave secreta para la firma de tokens.
+JWT_EXPIRES_IN: Tiempo de expiración del token (ej: 7d).
 
-- PUT (Actualizar una categoría existente)
-  
-    curl -X PUT http://localhost:5000/api/categoria/6983f8a27e60b1278e28e6ae \
-     -H "Content-Type: application/json" \
-     -d '{"name": "Computación y Gaming"}'
-     
-- DELETE (Eliminar categoria existente)
+## 🛠️ Instrucciones de Instalación
 
-  curl -X DELETE http://localhost:5000/api/categoria/6983f8a27e60b1278e28e6ae
-  
-## 📚 CURLS (Powershell) :
+1. **Clonar el repositorio:**
+   ```bash
+   git clone 
+   cd patitas-felices
+2.**Instalar Dependencias**
+   ```bash 
+  npm i (Lee el package.json e instala las dependencies y devDependencies)
+```
+3.**Configurar el entorno**
+```bash
+Crea un archivo .env en la raíz del proyecto basándote en el archivo .env.example.
+```
+3.**🚀 Pasos para ejecutar el proyecto**
+```bash
+-Desarrollo: npm run dev
+-Producccion: npm run build y luego npm start
+```
 
-- GET (Obtener todas las categorías)
-  
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria" -Method Get
+## 📖 Guía de Uso del Sistema
 
-- GET (Obtener una categoría por ID)
-  
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/{id}" -Method Get
+Para garantizar la integridad de los datos y respetar las relaciones entre entidades, el flujo de trabajo recomendado es:
 
-Ej con categoria con id 10: Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/10" -Method Get
+### 1. Registro de Dueños (Usuarios)
+Antes de cargar una mascota, el **Dueño** debe estar registrado en el sistema. 
+- Esto se puede hacer desde la página principal (`index.html`) en la sección **"¿Sos nuevo? Registrate"**.
+- El **Email** registrado será la "llave" para vincularlo con sus futuras mascotas.
 
-- POST (Crear una nueva categoría)
-  
-Ej con categoria "Limpieza":
-$body = @{ name = "Limpieza" } | ConvertTo-Json
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria" -Method Post -Body $body -ContentType "application/json"
+### 2. Carga de Mascotas
+Una vez que el dueño existe en la base de datos:
+- **Desde el Portal Clientes:** El dueño puede registrar su propia mascota (se vincula automáticamente a su cuenta).
+- **Desde el Portal Staff:** El Veterinario o Admin puede registrar una mascota ingresando el **Email del Dueño**. El sistema validará que el email exista y obtendrá el ID correspondiente de forma interna.
 
->> Ej para evitar errores por UTF-8:
->>
->>$body = @{ name = "Tecnología y Audio" } | ConvertTo-Json -Compress
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria" `
-                  -Method Post `
-                  -Body ([System.Text.Encoding]::UTF8.GetBytes($body)) `
-                  -ContentType "application/json; charset=utf-8"
+### 3. Atención Veterinaria e Historial
+- El personal de Staff busca al paciente en la tabla **"Pacientes en el Sistema"**.
+- Al presionar **"Atender"**, se despliega el historial previo (motivo, diagnóstico y tratamiento) indicando qué profesional realizó cada consulta.
+- El **Admin** cuenta con permisos especiales para **Editar** registros médicos previos en caso de errores de carga y **Borrar** mascotas del sistema.
 
-- PUT (Actualizar una categoría existente)
-  
-Ej con categoria "Limpieza":
+### 🔐 Reglas de Negocio Implementadas
+- **Privacidad:** Los dueños solo ven a sus propias mascotas.
+- **Jerarquía:** Solo el rol `admin` puede eliminar registros; los `vet` solo pueden crear y editar.
+- **Validación:** No se pueden crear mascotas para emails que no estén registrados previamente como usuarios.
 
-$body = @{ name = "Limpieza" } | ConvertTo-Json
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/{id}" -Method Put -Body $body -ContentType "application/json"
+### 🔐 Endpoints Principales (Ejemplos)
+POST /api/auth/register: Registro de usuarios.
+POST /api/auth/login: Login (retorna token y rol).
+GET /api/mascotas/mis-mascotas: Mascotas del usuario autenticado.
+GET /api/mascotas: Lista completa (Solo Staff).
+PUT /api/historial/:id: Edición de registro médico (Solo Staff).
+DELETE /api/mascotas/:id: Eliminación de mascota (Solo Admin).
 
-- DELETE (Eliminar categoria existente)
-  
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/{id}" -Method Delete
+### 🧪 Pruebas con Insomnia
+Para probar los endpoints protegidos, seguí este flujo:
+1. **Login:** Realizá un `POST` a `/api/auth/login` con las credenciales.
+2. **Token:** Copiá el `token` recibido en la respuesta.
+3. **Auth:** En la pestaña **Auth** de tu cliente REST, seleccioná **Bearer Token** y pegá el código.
+4. **Roles:** Recordá que si intentás usar `DELETE` con un usuario de rol `vet`, recibirás un `403 Forbidden`.
 
-Ej con categoria 10:
-Invoke-RestMethod -Uri "http://localhost:5000/api/categoria/10" -Method Delete
+
+### 🌐 Opción de Frontend Utilizada
+Se utiliza una Arquitectura de Archivos Estáticos. El servidor Express sirve los archivos HTML, CSS y JS directamente desde la carpeta /public mediante el middleware express.static. La lógica de interacción se maneja con Vanilla JavaScript y la Fetch API para comunicarse con los endpoints RESTful del backend.
+
