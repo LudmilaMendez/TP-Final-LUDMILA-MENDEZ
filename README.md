@@ -17,9 +17,13 @@ El sistema utiliza una arquitectura **MVC (Modelo-Vista-Controlador)** y aplica 
 
 ## ⚙️ Variables de Entorno Requeridas
 El archivo .env debe contener:
+
 PORT: Puerto de escucha del servidor (ej: 5000).
+
 MONGODB_URI: Cadena de conexión a MongoDB Atlas o local.
+
 JWT_SECRET: Clave secreta para la firma de tokens.
+
 JWT_EXPIRES_IN: Tiempo de expiración del token (ej: 7d).
 
 ## 🛠️ Instrucciones de Instalación
@@ -62,20 +66,28 @@ Una vez que el dueño existe en la base de datos:
 - Al presionar **"Atender"**, se despliega el historial previo (motivo, diagnóstico y tratamiento) indicando qué profesional realizó cada consulta.
 - El **Admin** cuenta con permisos especiales para **Editar** registros médicos previos en caso de errores de carga y **Borrar** mascotas del sistema.
 
-### 🔐 Reglas de Negocio Implementadas
+## 🔐 Reglas de Negocio Implementadas
+
 - **Privacidad:** Los dueños solo ven a sus propias mascotas.
 - **Jerarquía:** Solo el rol `admin` puede eliminar registros; los `vet` solo pueden crear y editar.
 - **Validación:** No se pueden crear mascotas para emails que no estén registrados previamente como usuarios.
 
-### 🔐 Endpoints Principales (Ejemplos)
+## 🔐 Endpoints Principales (Ejemplos)
+
 POST /api/auth/register: Registro de usuarios.
+
 POST /api/auth/login: Login (retorna token y rol).
+
 GET /api/mascotas/mis-mascotas: Mascotas del usuario autenticado.
+
 GET /api/mascotas: Lista completa (Solo Staff).
+
 PUT /api/historial/:id: Edición de registro médico (Solo Staff).
+
 DELETE /api/mascotas/:id: Eliminación de mascota (Solo Admin).
 
-### 🧪 Pruebas con Insomnia
+## 🧪 Pruebas con Insomnia
+
 Para probar los endpoints protegidos, seguí este flujo:
 1. **Login:** Realizá un `POST` a `/api/auth/login` con las credenciales.
 2. **Token:** Copiá el `token` recibido en la respuesta.
@@ -127,24 +139,34 @@ Cuerpo (JSON):
 }
 ```
 5. Borrado de Mascota (`DELETE /api/mascotas/:id`)
+
 Si usás el token de un user o vet -> 403 Forbidden.
+
 Si usás el token de un admin -> 200 OK.
+
 Debajo de la URL, buscá la pestaña Auth.
+
 Elegí Bearer Token.
+
 En el campo Token, pegá el token que obtuviste al hacer Login con el Admin (ej: admin@patitas.com).
 
-### 🔑 Cuentas de Prueba Sugeridas
+## 🔑 Cuentas de Prueba Sugeridas
+
 Para probar los distintos niveles de acceso, podés registrar o usar estas cuentas:
 
-- **Administrador:** `admin@patitas.com` / `AdminPassword123!` 
+- **Administrador:** `admin@patitas.com` / `AdminPassword123!`
+  
   *(Acceso total: Borrado de mascotas y edición de historiales).*
-- **Veterinario:** `vet_garcia@patitas.com` / `Garcia2024!` 
+- **Veterinario:** `vet_garcia@patitas.com` / `Garcia2024!`
+  
   *(Acceso staff: Atender mascotas y editar nombre, edad e historiales, pudiendo ver que compañero agregó consultas).*
-- **Dueño:** `luly@test.com` / `Password123!` 
+- **Dueño:** `luly@test.com` / `Password123!`
+  
   *(Acceso cliente: Ver solo mascotas propias y sus historiales).*
 
 
 
-### 🌐 Opción de Frontend Utilizada
+## 🌐 Opción de Frontend Utilizada
+
 Se utiliza una Arquitectura de Archivos Estáticos. El servidor Express sirve los archivos HTML, CSS y JS directamente desde la carpeta /public mediante el middleware express.static. La lógica de interacción se maneja con Vanilla JavaScript y la Fetch API para comunicarse con los endpoints RESTful del backend.
 
