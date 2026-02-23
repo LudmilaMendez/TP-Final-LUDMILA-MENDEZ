@@ -7,7 +7,6 @@ import { authenticate, authorize } from '../middlewares/auth.middleware';
 const router: Router = Router();
 
 // Buscar por email o username (Ej: /api/users/search?email=test@test.com)
-// O podés usar el que tenías definido por params si lo preferís
 router.get('/search/:email/:username', authenticate, userController.findUserByEmailOrUsername);
 
 // CRUD estándar

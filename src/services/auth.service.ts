@@ -25,7 +25,7 @@ export const register = async (
 export const login = async (
     email: string,
     password: string
-): Promise<string> => {
+): Promise<{ token: string, role: string }> => {
     // 1. Validamos la existencia de la KEY aquí adentro
     const secretKey = process.env.JWT_SECRET;
     if (!secretKey) {
@@ -52,5 +52,10 @@ export const login = async (
         issuer: 'curso-utn-backend',
     };
 
-    return jwt.sign(payload, secretKey, options);
+    const token = jwt.sign(payload, secretKey, options);
+
+    return { 
+        token, 
+        role: user.role as UserRole 
+    };
 };

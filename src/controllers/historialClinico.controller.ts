@@ -6,7 +6,7 @@ import * as petService from '../services/pets.service';
 export const createRecord = async (req: Request, res: Response) => {
     try {
         const { petId, description, diagnosis, treatment } = req.body;
-        const vetId = (req as any).user.id; 
+        const vetId = (req as any).user.id; // Extrae el ID del token JWT del veterinario
 
         const recordData = { petId, description, diagnosis, treatment, vetId };
 
@@ -31,8 +31,7 @@ export const getByPet = async (req: Request, res: Response) => {
             return res.status(404).json({ message: "Mascota no encontrada" });
         }
 
-        // Validación: Si es un usuario común, debe ser el dueño
-                    // ... (buscamos la mascota arriba) ...
+        // Validación: ve si el ownerId de la mascota coincide con el userId del token, para evitar filtrar datos entre usuarios
             if (userRole === 'user' && pet.ownerId !== userId) {
             return res.status(403).json({ message: "No tenés permiso para ver este historial" });
         }
@@ -57,3 +56,27 @@ export const getAll = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Error al obtener todos los registros", error });
     }
 };
+
+//4. Editar un registro médico (Solo Veterinarios/Admins)
+export const updateRecord = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    try {
+        const updated = await historialService.updateRecord(id, req.body);
+        if (!updated) return res.status(404).json({ message: "Registro no encontrado" });
+        return res.status(200).json(updated);
+    } catch (error) {
+        return res.status(500).json({ message: "Error al editar registro médico", error });
+    }
+};
+//5. Eliminar un registro médico (Solo Admins)
+export const deleteRecord = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    try {
+        const deleted = await historialService.deleteRecord(id);
+        if (!deleted) return res.status(404).json({ message: "Registro no encontrado" });
+        return res.status(200).json({ message: "Registro clínico eliminado por el administrador" });
+    } catch (error) {
+        return res.status(500).json({ message: "Error al eliminar registro médico", error });
+    }
+};
+

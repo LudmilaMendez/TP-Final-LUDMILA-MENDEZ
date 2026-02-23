@@ -4,9 +4,11 @@ import { CreateHistorialDTO, HistorialResponseDTO } from "../types/historial";
 const mapToResponseDTO = (record: any): HistorialResponseDTO => {
     return {
         id: record._id.toString(),
-        // Si petId es un objeto (porque hubo populate), lo devolvemos tal cual o su ID
         petId: record.petId, 
-        vetId: record.vetId,
+        // 🛡️ SEGURIDAD: Verificamos si es objeto (poblado) o string (recién guardado)
+        vetId: (record.vetId && record.vetId.username) 
+        ? record.vetId.username 
+        : record.vetId.toString(),
         description: record.description,
         diagnosis: record.diagnosis,
         treatment: record.treatment,
@@ -15,12 +17,18 @@ const mapToResponseDTO = (record: any): HistorialResponseDTO => {
     };
 };
 
-// 1. Crear Historial (Solo el Veterinario)
+
+// 1. Crear Historial (Veterinarios/Admins) - El vetId se asigna automáticamente desde el token JWT para evitar suplantaciones de identidad
 export const createRecord = async (data: CreateHistorialDTO & { vetId: string }): Promise<HistorialResponseDTO> => {
     const newRecord = new HistorialClinico(data);
     const savedRecord = await newRecord.save();
+    // Traemos los datos del veterinario (Dra. Garcia, Dr. Perez, etc.) 
+    // para que el mapToResponseDTO pueda leer el .username
+    await savedRecord.populate('vetId', 'username email');
+    
     return mapToResponseDTO(savedRecord);
 };
+
 
 // 2. Ver todos los historiales de una Mascota específica
 export const getRecordsByPet = async (petId: string): Promise<HistorialResponseDTO[]> => {
@@ -36,4 +44,18 @@ export const getAllRecords = async (): Promise<HistorialResponseDTO[]> => {
         .populate('petId', 'name')
         .populate('vetId', 'username');
     return records.map(mapToResponseDTO);
+};
+
+//4. Editar un historial (Solo para Veterinarios/Admins). NO HACE FALTA que si o si sea el vet que lo atendio antes, porque queda asentado quien hizo la nueva consulta
+export const updateRecord = async (id: string, data: Partial<CreateHistorialDTO>): Promise<HistorialResponseDTO | null> => {
+    // Al hacer update, volvemos a poblar vetId para que el mapeo no falle
+    const updated = await HistorialClinico.findByIdAndUpdate(id, data, { new: true })
+        .populate('vetId', 'username email');
+    return updated ? mapToResponseDTO(updated) : null;
+};
+
+//5. Eliminar un historial (Solo para Admins)
+export const deleteRecord = async (id: string): Promise<HistorialResponseDTO | null> => {
+    const deleted = await HistorialClinico.findByIdAndDelete(id);
+    return deleted ? mapToResponseDTO(deleted) : null;
 };

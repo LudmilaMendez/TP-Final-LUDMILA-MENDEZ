@@ -15,20 +15,27 @@ async function login() {
 
         const data = await res.json();
 
-        if (data.token) {
-            // Decodificamos el token (Payload)
+        if (res.ok && data.token) {
+            // Decodificamos el token para saber quién es
             const payload = JSON.parse(atob(data.token.split('.')[1]));
 
-            // BLOQUEO DE SEGURIDAD: Solo VET o ADMIN pueden pasar
+            // 🛡️ FILTRO DE SEGURIDAD REFORZADO:
             if (payload.role !== 'vet' && payload.role !== 'admin') {
-                alert("⛔ Acceso denegado: Este portal es exclusivo para el Staff de la veterinaria.");
-                return; // Cortamos la ejecución aquí
+                const irAClientes = confirm(
+                    "⛔ Acceso denegado: Este portal es exclusivo para el Staff.\n\n" +
+                    "¿Querés ir al Portal de Clientes?"
+                );
+                
+                if (irAClientes) {
+                    window.location.href = "/index.html"; 
+                }
+                return; 
             }
 
             // Si es Staff, guardamos sesión y mostramos panel
             token = data.token;
             currentUser = payload;
-
+            
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('mainSection').style.display = 'block';
             document.getElementById('userName').innerText = payload.username;
@@ -43,8 +50,6 @@ async function login() {
         alert("Error de conexión con el servidor"); 
     }
 }
-
-
 // --- READ (Cargar Mascotas) ---
 async function loadPets() {
     try {
@@ -62,7 +67,8 @@ async function loadPets() {
         <td>${pet.name}</td>
         <td>${pet.species}</td>
         <td>${pet.age} ${pet.age === 1 ? 'año' : 'años'}</td>
-        <td>${pet.ownerId}</td>
+        <td>${pet.ownerName}</td> 
+
         <td>
             <button onclick="openConsultation('${pet.id}', '${pet.name}')" style="background:#28a745">Atender</button>
             <button onclick="editPet('${pet.id}', '${pet.name}', ${pet.age})" style="background:#ffc107; color:black">Editar</button>
@@ -77,40 +83,57 @@ async function loadPets() {
 
 // --- CREATE (Nueva Mascota) ---
 async function createNewPet() {
-    const body = {
-        name: document.getElementById('newName').value,
-        species: document.getElementById('newSpecies').value,
-        age: parseInt(document.getElementById('newAge').value),
-        ownerId: document.getElementById('newOwnerId').value
-    };
+    const email = document.getElementById('newOwnerEmail').value;
+    const name = document.getElementById('newName').value;
+    const species = document.getElementById('newSpecies').value;
+    const breed = document.getElementById('newBreed').value || "Mestizo"; // Simplificado
+    const age = parseInt(document.getElementById('newAge').value);
 
-    if(!body.name || !body.ownerId) return alert("Nombre y Dueño son obligatorios");
+    if (!name || !email) return alert("Nombre y Email del dueño son obligatorios");
 
-    const res = await fetch('/api/mascotas', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json', 
-            'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify(body)
-    });
+    try {
+        // 1. Buscamos al dueño
+        const userRes = await fetch(`/api/users/search/${email}/none`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!userRes.ok) return alert("❌ No se encontró un usuario con ese email.");
 
-    if (res.ok) {
-        alert("¡Nueva mascota registrada!");
-        document.getElementById('newName').value = "";
-        document.getElementById('newSpecies').value = "";
-        document.getElementById('newAge').value = "";
-        document.getElementById('newOwnerId').value = "";
-        loadPets();
-    } else {
-        alert("Error al crear. Verificá el ID del dueño.");
+        const userData = await userRes.json();
+        
+        // 2. Definimos el ID (Aseguramos capturarlo del DTO o del objeto directo)
+        const ownerId = userData.id || userData._id; 
+
+        if (!ownerId) return alert("❌ Error: El servidor no envió el ID del dueño.");
+
+        // 3. Enviamos la creación
+        const res = await fetch('/api/mascotas', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({ name, species, age, ownerId, breed })
+        });
+
+        if (res.ok) {
+            alert("¡Nueva mascota registrada exitosamente!");
+            document.getElementById('newName').value = "";
+            document.getElementById('newOwnerEmail').value = "";
+            loadPets();
+        } else {
+            alert("Error al registrar en la base de datos.");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Error de conexión.");
     }
 }
 
 // --- UPDATE (Editar Mascota) ---
 async function editPet(id, currentName, currentAge) {
-    const newName = prompt("Nuevo nombre:", currentName);
-    const newAge = prompt("Nueva edad:", currentAge);
+    const newName = prompt("Nuevo nombre:", currentName); //Si hubo un error al cargar el nombre
+    const newAge = prompt("Nueva edad:", currentAge); //Para actualizarla
 
     if (newName !== null && newAge !== null) {
         const res = await fetch(`/api/mascotas/${id}`, {
@@ -132,6 +155,7 @@ async function editPet(id, currentName, currentAge) {
 }
 
 // --- DELETE (Borrar Mascota) ---
+//Funcion que solo puede realizar Admin, por eso no se muestra el boton de borrar a los veterinarios
 async function deletePet(id) {
     if (!confirm("¿Seguro que querés borrar este paciente? No hay vuelta atrás.")) return;
 
@@ -168,7 +192,15 @@ async function openConsultation(id, name) {
             historyDiv.innerHTML = "<strong>Consultas anteriores:</strong><br>" + 
                 history.map(h => `
                     <div style="margin-top:10px; border-bottom:1px solid #ccc; padding-bottom:5px;">
-                        <small>${new Date(h.date).toLocaleDateString()}</small> | 
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; margin-bottom: 5px;">
+                        <small>${new Date(h.date).toLocaleDateString()}</small> 
+                        <small>🩺Atendido por: <b>Vet:</b> ${h.vetId}</small> <!-- PARA VER QUE COMPANERO ATENDIO LA CONSULTA -->| 
+                        <button onclick="editMedicalRecord('${h.id}', '${h.description}', '${h.diagnosis}', '${h.treatment}')" 
+                            style="width:auto; padding: 2px 8px; background: #ffc107; color: black; font-size: 0.7em;">
+                        Editar Registro
+                    </button>
+                    </div>
+                        <b>📝 Motivo:</b> ${h.description}<br>
                         <b>Diag:</b> ${h.diagnosis} | <b>Trat:</b> ${h.treatment}
                     </div>
                 `).join('');
@@ -203,6 +235,37 @@ async function saveRecord() {
         document.getElementById('treatment').value = "";
     } else {
         alert("❌ Error: Verificá tus permisos de Staff");
+    }
+}
+
+async function editMedicalRecord(recordId, oldDesc, oldDiag, oldTrat) {
+    const newDesc = prompt("Corregir Motivo/Descripción:", oldDesc);
+    const newDiag = prompt("Corregir Diagnóstico:", oldDiag);
+    const newTrat = prompt("Corregir Tratamiento:", oldTrat);
+
+    if (newDesc && newDiag && newTrat) {
+        const res = await fetch(`/api/historial/${recordId}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({ 
+                description: newDesc, 
+                diagnosis: newDiag, 
+                treatment: newTrat 
+            })
+        });
+
+        if (res.ok) {
+            alert("✅ Registro médico corregido correctamente");
+            // Se refresca la consulta para mostrar los cambios, manteniendo el mismo paciente abierto
+            const petId = document.getElementById('selectedPetId').value;
+            const petName = document.getElementById('formTitle').innerText.replace("Atendiendo a: ", "");
+            openConsultation(petId, petName);
+        } else {
+            alert("❌ Error al editar el registro");
+        }
     }
 }
 

@@ -14,8 +14,6 @@ import { connectDB } from './config/database'; //! CUANDO SE HACE DECLARACION DE
 import authRoutes from './routes/auth.route';
 import petsroutes from './routes/pets.route'; // IMPORTAMOS LAS RUTAS DE MASCOTAS
 import historialroutes from './routes/historialClinico.route'; // IMPORTAMOS LAS RUTAS DE HISTORIAL CLINICO
-//import categoriesroutes from './routes/categories.routes'; // IMPORTAMOS LAS RUTAS DE CATEGORIAS
-//import productsroutes from './routes/products.routes'; // IMPORTAMOS LAS RUTAS DE PRODUCTOS
 import { authenticate, authorize } from './middlewares/auth.middleware';
 import { AppError } from './types/appError';
 import { errorHandler } from './middlewares/error.middleware';

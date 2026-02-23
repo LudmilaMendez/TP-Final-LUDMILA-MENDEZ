@@ -8,8 +8,9 @@ const mapToResponseDTO = (pet: IPet): PetResponseDTO => {
         species: pet.species,
         breed: pet.breed,
         age: pet.age,
-        // CORRECCIÓN: Si está poblado sacamos el _id, si no, lo usamos directo
+        // Esto evita que un usuario intente registrar una mascota a nombre de otra persona, ya que el ownerId se asigna automáticamente al crear la mascota
         ownerId: (pet.ownerId as any)._id ? (pet.ownerId as any)._id.toString() : pet.ownerId.toString(),
+        ownerName: (pet.ownerId as any).username || 'Usuario Desconocido',
         createdAt: pet.createdAt
     };
 };
@@ -21,7 +22,7 @@ export const getAllPets = async (): Promise<PetResponseDTO[]> => {
 };
 
 export const getPetById = async (id: string): Promise<PetResponseDTO | null> => {
-    const pet = await Pet.findById(id).populate('ownerId', 'username email');
+    const pet = await Pet.findById(id).populate('ownerId', 'username email'); //Seccion "VER MIS MASCOTAS"
     return pet ? mapToResponseDTO(pet) : null;
 };
 

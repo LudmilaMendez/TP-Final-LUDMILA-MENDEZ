@@ -28,4 +28,20 @@ router.get(
     historialController.getAll
 );
 
+// 4.Editar: Veterinarios y Admin pueden corregir datos médicos 🩺
+router.put(
+    '/:id', 
+    authenticate, 
+    authorize(['vet', 'admin']), 
+    historialController.updateRecord
+);
+
+// 5.Borrar: SÓLO EL ADMIN puede eliminar un registro del sistema 🛑
+router.delete(
+    '/:id', 
+    authenticate, 
+    authorize(['admin']), 
+    historialController.deleteRecord
+);
+
 export default router;

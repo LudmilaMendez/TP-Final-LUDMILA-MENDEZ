@@ -5,17 +5,21 @@ import { CreatePetDTO } from '../types/pets';
 // 1. Crear Mascota (Automático por Token)
 export const createPet = async (req: Request, res: Response) => {
     try {
-        const { name, species, breed, age } = req.body;
-        
-        // Sacamos el ID del dueño del token (inyectado por authenticate)
-        const ownerId = (req as any).user.id; 
+        const { name, species, breed, age, ownerId } = req.body;
+        const userRole = (req as any).user.role;
+        const userId = (req as any).user.id;
+
+        // LÓGICA DE ASIGNACIÓN:
+        // Si es un usuario común, siempre es dueño de lo que crea.
+        // Si es Staff/Admin, usa el ownerId que mandamos desde el formulario.
+        const finalOwnerId = userRole === 'user' ? userId : ownerId;
 
         const petData: CreatePetDTO = {
             name,
             species,
-            breed,
+            breed: breed || 'Mestizo', 
             age,
-            ownerId
+            ownerId: finalOwnerId
         };
 
         const newPet = await petService.createPet(petData);
@@ -25,7 +29,8 @@ export const createPet = async (req: Request, res: Response) => {
     }
 };
 
-// 2. Ver solo MIS mascotas
+
+// 2. Ver solo MIS mascotas gracias al ownerId del token
 export const getMyPets = async (req: Request, res: Response) => {
     try {
         const ownerId = (req as any).user.id;
@@ -58,3 +63,30 @@ export const getPetById = async (req: Request, res: Response) => {
     }
 };
 
+// 5. Actualizar Mascota (Solo para Staff/Admin)
+export const updatePet = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    try {
+        const updatedPet = await petService.updatePet(id, req.body);
+        if (!updatedPet) {
+            return res.status(404).json({ message: "Mascota no encontrada para actualizar" });
+        }
+        return res.status(200).json(updatedPet);
+    } catch (error) {
+        return res.status(500).json({ message: "Error al actualizar la mascota", error });
+    }
+};
+
+// 6. Eliminar Mascota (Solo para Admin)
+export const deletePet = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    try {
+        const deletedPet = await petService.deletePet(id);
+        if (!deletedPet) {
+            return res.status(404).json({ message: "Mascota no encontrada para eliminar" });
+        }
+        return res.status(200).json({ message: "Mascota eliminada correctamente" });
+    } catch (error) {
+        return res.status(500).json({ message: "Error al eliminar la mascota", error });
+    }
+};

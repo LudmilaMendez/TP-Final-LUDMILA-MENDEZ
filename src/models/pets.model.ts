@@ -5,7 +5,7 @@ export interface IPet extends Document {
     species: string;
     breed: string;   // Raza
     age: number;
-    ownerId: mongoose.Types.ObjectId; // Relación con Users
+    ownerId: mongoose.Types.ObjectId | { _id: string, username: string }; // Relación con Users
     createdAt: Date;
 }
 

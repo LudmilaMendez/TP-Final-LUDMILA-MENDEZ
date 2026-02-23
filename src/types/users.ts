@@ -11,6 +11,7 @@ export interface UpdateUserDTO extends Partial<CreateUserDTO> { }
 export interface UpdateUserDTO extends Partial<CreateUserDTO> { }
 
 export interface UserResponseDTO {
+    id: string;
     username: string;
     email: string;
     phone: string;

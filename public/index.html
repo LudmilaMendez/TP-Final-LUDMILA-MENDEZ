@@ -103,23 +103,43 @@
 
         // --- FUNCION LOGIN ---
         async function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const data = await res.json();
-            if (data.token) {
-                token = data.token;
-                document.getElementById('authContainer').style.display = 'none';
-                document.getElementById('mainSection').style.display = 'block';
-                loadPets();
-            } else {
-                alert("Error: " + (data.error || "Credenciales incorrectas"));
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await res.json();
+
+        if (res.ok && data.token) {
+            // --- 🛡️ FILTRO DE SEGURIDAD PARA EL PORTAL DE CLIENTES ---
+            if (data.role === 'vet' || data.role === 'admin') {
+                const irAlStaff = confirm("Detectamos que sos personal de la clínica.\n\nEste panel es solo para clientes. ¿Querés ir al Portal Staff?");
+                
+                if (irAlStaff) {
+                    // Redirigimos a la página de staff PORQUE NO ES UN DUEÑO y no tiene por que entrar al panel de clientes 
+                    window.location.href = "/staffPage/staff.html"; 
+                }
+                return; // Cortamos la ejecución para que no entre al panel de clientes
             }
+
+            // --- SI ES UN DUEÑO (USER), ENTRA NORMALMENTE ---
+            token = data.token;
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('mainSection').style.display = 'block';
+            loadPets();
+        } else {
+            alert("Error: " + (data.error || "Credenciales incorrectas"));
         }
+    } catch (error) {
+        console.error("Error en el login:", error);
+        alert("Hubo un problema al conectar con el servidor.");
+    }
+}
 
         // --- CARGAR MIS MASCOTAS ---
         async function loadPets() {

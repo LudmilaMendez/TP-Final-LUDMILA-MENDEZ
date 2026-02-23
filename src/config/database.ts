@@ -3,7 +3,7 @@
 import mongoose from 'mongoose';
 import 'dotenv/config';
 
-const MONGODB_URI = //"mongodb+srv://luly:patitasfelices@cluster1.knrfuiq.mongodb.net/Patitas-Felices";
+const MONGODB_URI =
 process.env.MONGODB_URI || 'mongodb+srv://luly:patitasfelices@cluster1.knrfuiq.mongodb.net/Patitas-Felices'
 
 console.log("DEBUG: La URI leída es:", process.env.MONGODB_URI);

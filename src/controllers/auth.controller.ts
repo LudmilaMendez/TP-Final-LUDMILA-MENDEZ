@@ -31,9 +31,9 @@ export const login = async (req: Request, res: Response) => {
         }
 
         const { email, password } = req.body;
-        const token = await authService.login(email, password);
+        const data = await authService.login(email, password);
 
-        return res.json({ token });
+        return res.json(data);
     } catch (error: any) {
         if (error.message === 'Credenciales inválidas') {
             return res.status(401).json({ error: error.message });
