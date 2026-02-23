@@ -26,8 +26,9 @@ JWT_EXPIRES_IN: Tiempo de expiración del token (ej: 7d).
 
 1. **Clonar el repositorio:**
    ```bash
-   git clone 
+   git clone https://github.com/LudmilaMendez/TP-Final-LUDMILA-MENDEZ.git
    cd patitas-felices
+   ```
 2.**Instalar Dependencias**
    ```bash 
   npm i (Lee el package.json e instala las dependencies y devDependencies)
@@ -80,6 +81,68 @@ Para probar los endpoints protegidos, seguí este flujo:
 2. **Token:** Copiá el `token` recibido en la respuesta.
 3. **Auth:** En la pestaña **Auth** de tu cliente REST, seleccioná **Bearer Token** y pegá el código.
 4. **Roles:** Recordá que si intentás usar `DELETE` con un usuario de rol `vet`, recibirás un `403 Forbidden`.
+Para verificar el funcionamiento de la API, seguí este orden lógico de peticiones:
+1. **Registro de Usuarios** (`POST /api/auth/register`)
+Cuerpo (JSON):
+```
+{
+  "username": "usuario_prueba",
+  "email": "test@ejemplo.com", 
+  "password": "Password123!",
+  "phone": "1122334455",
+  "role": "user"
+}
+```
+2. **Login** (`POST /api/auth/login`)
+Cuerpo (JSON):
+```
+{
+  "email": "luly@test.com",
+  "password": "Password123!"
+}
+```
+Copiá el token de la respuesta y pegalo en la pestaña Auth > Bearer Token de las siguientes peticiones.
+
+3. Registro de Mascota (`POST /api/mascotas`)
+(Como Staff, requiere email de dueño previo)
+Cuerpo (JSON):
+```
+{
+  "name": "Pity",
+  "species": "Perro",
+  "age": 3,
+  "ownerId": "ID_OBTENIDO_POR_EMAIL",
+  "breed": "Mestizo"
+}
+```
+4. Crear Historial Clínico (`POST /api/historial`)
+(Solo rol vet o admin)
+Cuerpo (JSON):
+```
+{
+  "petId": "ID_DE_LA_MASCOTA",
+  "description": "Control de rutina",
+  "diagnosis": "Sana",
+  "treatment": "Ninguno"
+}
+```
+5. Borrado de Mascota (`DELETE /api/mascotas/:id`)
+Si usás el token de un user o vet -> 403 Forbidden.
+Si usás el token de un admin -> 200 OK.
+Debajo de la URL, buscá la pestaña Auth.
+Elegí Bearer Token.
+En el campo Token, pegá el token que obtuviste al hacer Login con el Admin (ej: admin@patitas.com).
+
+### 🔑 Cuentas de Prueba Sugeridas
+Para probar los distintos niveles de acceso, podés registrar o usar estas cuentas:
+
+- **Administrador:** `admin@patitas.com` / `AdminPassword123!` 
+  *(Acceso total: Borrado de mascotas y edición de historiales).*
+- **Veterinario:** `vet_garcia@patitas.com` / `Garcia2024!` 
+  *(Acceso staff: Atender mascotas y editar nombre, edad e historiales, pudiendo ver que compañero agregó consultas).*
+- **Dueño:** `luly@test.com` / `Password123!` 
+  *(Acceso cliente: Ver solo mascotas propias y sus historiales).*
+
 
 
 ### 🌐 Opción de Frontend Utilizada
